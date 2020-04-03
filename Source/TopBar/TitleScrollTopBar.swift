@@ -67,6 +67,9 @@ open class TitleScrollTopBar: UIView, TopBar, RXCPageViewDelegate, UICollectionV
     }
 
     open func initIndicatorView(style: TitleScrollTopBarStyle) -> UIView {
+        if let closure = style.indicatorMaker {
+            return closure()
+        }
         let view: UIView = UIView()
         view.backgroundColor = style.indicatorColor
         view.layer.cornerRadius = style.indicatorCornerRadius
