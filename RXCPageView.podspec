@@ -11,7 +11,7 @@ Pod::Spec.new do |spec|
   spec.platform     = :ios, "11.0"
 
   spec.source       = { :git => "https://github.com/ruixingchen/RXCPageView.git", :tag => spec.version.to_s }
-  spec.source_files  = "Source/*.{swift}"
+  spec.source_files  = "Source/**/*.{swift}"
   spec.framework = "UIKit"
 
   spec.requires_arc = true
