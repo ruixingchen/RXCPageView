@@ -58,8 +58,12 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     open var rearrangedPageForJumping: [Int]?
 
     open var currentPage: Int
-    open var lastContentOffset: CGFloat = 0
-    open var lastVisibleVirtualPage: [Int] = []
+    open var lastContentOffset: CGFloat?
+
+    open var lastVisibleVirtualPage: [Int] {
+        guard let last: CGFloat = self.lastContentOffset else {return []}
+        return self.visibleVirtualPages(offset: last, viewPortSize: self.viewPortSize)
+    }
 
     open var jumping: Bool = false
 
@@ -122,7 +126,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
             let oldValue: CGPoint? = change?[.oldKey] as? CGPoint
             if oldValue == nil || newValue != oldValue {
                 //这里必须要判断的确是发生了变化才可以通知, 否则会导致currentPage提前发生变化
-                self.scrollViewContentOffsetDidChange()
+                self.scrollViewContentOffsetDidChange(change: change)
             }
         } else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
@@ -136,12 +140,11 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
 
         if self.numberOfPages() > 0 {
             if page == 0 && self.view(at: 0, includingRearranged: true).frame != self.frame(for: 0, viewPortSize: self.viewPortSize) {
-                //当是第一页的时候, 由于offset没有变化, 导致第0页不显示, 这里强制调用offsetDidChange, 让0页显示
-                self.scrollViewContentOffsetDidChange()
+                //当是第一页的时候, 由于offset没有变化, 导致第0页不显示, 这里强制让第0页显示
+                self.layoutPageView(force: true)
             }
         }
 
-        self.finishJumping()
     }
 
     //MARK: - Delegate
@@ -193,16 +196,18 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     ///returns the index of visible pages, now every page has to fill the width, so it returns two pages at most
     ///warning, the page is virtual, means the min page is -1 and the max page is self.views.count
     ///if viewPortSize.width equals to 0, will return an empty array
-    open func visibleVirtualPages(offset: CGFloat, viewPortSize: CGSize) -> [Int] {
-        let offset: CGFloat = self.scrollView.contentOffset.x
-        let viewWidth: CGFloat = self.viewPortSize.width
+    open func visibleVirtualPages(offset: CGFloat?, viewPortSize: CGSize?) -> [Int] {
+        let offset: CGFloat = offset ?? self.scrollView.contentOffset.x
+        let viewPortSize: CGSize = viewPortSize ?? self.viewPortSize
+        let viewWidth: CGFloat = viewPortSize.width
         if viewWidth == 0 {
             return []
-        } else if offset < 0 {
-            return [-1, 0]
         } else {
             let pages: [Int]
-            let leftPage: Int = Int(offset / viewWidth)
+            var leftPage: Int = Int(offset / viewWidth)
+            if offset < 0 {
+                leftPage -= 1
+            }
             if self.isFullPage(offset: offset, viewPortSize: viewPortSize) {
                 pages = [leftPage]
             } else {
@@ -299,8 +304,9 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     }
 
     ///生成滚动事件
-    open func makeScrollEvent(offset: CGFloat, lastOffset: CGFloat) -> ScrollEvent {
+    open func makeScrollEventOnScrolling(offset: CGFloat, lastOffset: CGFloat?) -> ScrollEvent {
         let viewPortSize: CGSize = self.viewPortSize
+        let lastOffset = lastOffset ?? 0
         if offset >= lastOffset  {
             //手指向左, 目标page + 1
             let fromPage: Int = lastOffset / viewPortSize.width < 0 ? -1 : Int(lastOffset / viewPortSize.width)
@@ -405,55 +411,39 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     ///完成跳跃
     open func finishJumping() {
         let previousJumping: Bool = self.jumping
+        let offset: CGFloat = self.scrollView.contentOffset.x
         self.jumping = false
         self.rearrangedPageForJumping = nil
         self.isUserInteractionEnabled = true
-        self.lastContentOffset = self.scrollView.contentOffset.x
-        self.lastVisibleVirtualPage = self.visibleVirtualPages(offset: self.scrollView.contentOffset.x, viewPortSize: self.viewPortSize)
-        self.currentPage = self.calculateCurrentVirtualPage(offset: self.scrollView.contentOffset.x, viewPortSize: self.viewPortSize)
+        self.currentPage = self.calculateCurrentVirtualPage(offset: offset, viewPortSize: self.viewPortSize)
         if previousJumping {
             self.enumerateDelegate(closure: { $0.pageView(didEndJumping: self) })
         }
     }
 
-    open func scrollViewContentOffsetDidChange() {
+    open func scrollViewContentOffsetDidChange(change: [NSKeyValueChangeKey: Any]?) {
         ///当处于jumping的时候无需进行通知
 
         let offset: CGFloat = scrollView.contentOffset.x
-        #if (debug || DEBUG)
-        //print("contentOffset变化:\(offset)")
-        #endif
+
         var event: ScrollEvent?
         if !self.jumping {
             #if (debug || DEBUG)
             print("触发滑动:\(offset), last:\(self.lastContentOffset)")
             #endif
-            event = self.makeScrollEvent(offset: offset, lastOffset: self.lastContentOffset)
+            event = self.makeScrollEventOnScrolling(offset: offset, lastOffset: self.lastContentOffset)
         }
-        self.lastContentOffset = offset
-        self.currentPage = self.calculateCurrentVirtualPage(offset: offset, viewPortSize: self.viewPortSize)
 
-        //开始更新本地View
+        #if (debug || DEBUG)
         let visiblePages: [Int] = self.visibleVirtualPages(offset: offset, viewPortSize: self.viewPortSize)
         let lastVisiblePages: [Int] = self.lastVisibleVirtualPage
+        print("当前可见:\(visiblePages), 上次可见:\(lastVisiblePages)")
+        #endif
+        
+        self.layoutPageView()
 
-        if visiblePages != lastVisiblePages {
-            //页面没有变化则无需更新页面
-            #if (debug || DEBUG)
-            print("当前可见:\(visiblePages), 上次可见:\(lastVisiblePages)")
-            #endif
-            for i: Int in lastVisiblePages {
-                if !visiblePages.contains(i) && (0..<self.numberOfPages()).contains(i) {
-                    self.hideView(at: i)
-                }
-            }
-            for i: Int in visiblePages {
-                if !lastVisiblePages.contains(i) && (0..<self.numberOfPages()).contains(i) {
-                    self.showView(at: i)
-                }
-            }
-            self.lastVisibleVirtualPage = visiblePages
-        }
+        self.lastContentOffset = offset
+        self.currentPage = self.calculateCurrentVirtualPage(offset: offset, viewPortSize: self.viewPortSize)
 
         if !self.jumping {
             if let _event: ScrollEvent = event {
@@ -461,6 +451,25 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
                 self.enumerateDelegate(closure: { $0.pageView(self, didScrollWith: _event) })
             }
         }
+    }
+    
+    ///布局当前可见的页面
+    open func layoutPageView(force:Bool=false) {
+        let visiblePages: [Int] = self.visibleVirtualPages(offset: self.scrollView.contentOffset.x, viewPortSize: self.viewPortSize)
+        let lastVisiblePages: [Int] = self.lastVisibleVirtualPage
+        if force || visiblePages != lastVisiblePages {
+            for i: Int in lastVisiblePages {
+                if !visiblePages.contains(i) && (0..<self.numberOfPages()).contains(i) {
+                    self.hideView(at: i)
+                }
+            }
+            for i: Int in visiblePages {
+                if (force || !lastVisiblePages.contains(i)) && (0..<self.numberOfPages()).contains(i) {
+                    self.showView(at: i)
+                }
+            }
+        }
+
     }
 
     //MARK: UIScrollViewDelegate
