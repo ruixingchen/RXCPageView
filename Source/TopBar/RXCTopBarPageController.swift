@@ -12,7 +12,8 @@ open class RXCTopBarPageController: UIViewController, TitleScrollTopBarDataSourc
 
     ///当前的ViewController, 默认没有didSet监听, 如果手动设置的话, 需要手动调用reloadData方法
     open var viewControllers: [UIViewController]
-    open var page: Int
+    internal let initialPage:Int
+    open var page: Int {self.pageView.currentPage}
 
     open var initPageTopBarClosure:(()->UIView)?
     open var layoutPageTopBarClosure:((UIView)->Void)?
@@ -28,20 +29,20 @@ open class RXCTopBarPageController: UIViewController, TitleScrollTopBarDataSourc
     }
 
     open func initPageView()->RXCPageView {
-        let view: RXCPageView = RXCPageView(frame: CGRect.zero, page: self.page)
+        let view: RXCPageView = RXCPageView(frame: CGRect.zero, page: self.initialPage)
         view.dataSource = self
         return view
     }
 
     public init(viewControllers:[UIViewController], page:Int) {
         self.viewControllers = viewControllers
-        self.page = page
+        self.initialPage = page
         super.init(nibName: nil, bundle: nil)
     }
 
     public required init?(coder: NSCoder) {
         self.viewControllers = coder.value(forKey: "viewControllers") as? [UIViewController] ?? []
-        self.page = coder.value(forKey: "page") as? Int ?? 0
+        self.initialPage = coder.value(forKey: "page") as? Int ?? 0
         super.init(coder: coder)
     }
 

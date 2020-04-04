@@ -67,7 +67,7 @@ open class TitleScrollTopBar: UIView, TopBar, RXCPageViewDelegate, UICollectionV
     }
 
     open func initIndicatorView(style: TitleScrollTopBarStyle) -> UIView {
-        if let closure = style.indicatorMaker {
+        if let closure: (() -> UIView) = style.indicatorMaker {
             return closure()
         }
         let view: UIView = UIView()
@@ -78,9 +78,13 @@ open class TitleScrollTopBar: UIView, TopBar, RXCPageViewDelegate, UICollectionV
 
     open func initSetup() {
         self.backgroundColor = self.style.backgroundColor
+
         self.addSubview(self.collectionView)
+
         self.collectionView.addSubview(self.indicatorView)
+
         self.hairlineView.backgroundColor = self.style.hairlineColor
+        self.addSubview(self.hairlineView)
     }
 
     open override func sizeThatFits(_ size: CGSize) -> CGSize {
