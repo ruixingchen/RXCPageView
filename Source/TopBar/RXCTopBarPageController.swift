@@ -14,7 +14,13 @@ open class RXCTopBarPageController: UIViewController, TitleScrollTopBarDataSourc
     open var viewControllers: [UIViewController]
     open var page: Int
 
+    open var initPageTopBarClosure:(()->UIView)?
+    open var layoutPageTopBarClosure:((UIView)->Void)?
+
     open func initPageTopBar() -> UIView? {
+        if let closure: (() -> UIView) = self.initPageTopBarClosure {
+            return closure()
+        }
         let style: TitleScrollTopBarStyle = TitleScrollTopBarStyle()
         let bar: TitleScrollTopBar = TitleScrollTopBar(style: style)
         bar.dataSource = self
@@ -62,9 +68,12 @@ open class RXCTopBarPageController: UIViewController, TitleScrollTopBarDataSourc
     }
 
     open func layoutPageTopBar() {
-        guard let bar: UIView = self.pageTopBar, bar.superview == self.view else {
-            return
+        guard let bar: UIView = self.pageTopBar else {return}
+        if let closure: ((UIView) -> Void) = self.layoutPageTopBarClosure {
+            closure(bar)
         }
+        guard bar.superview == self.view else {return}
+
         let size: CGSize = bar.sizeThatFits(self.view.bounds.size)
         let x: CGFloat = self.view.bounds.midX - size.width / 2
         let safeAreaTop: CGFloat = self.view.safeAreaInsets.top - self.additionalSafeAreaInsets.top
