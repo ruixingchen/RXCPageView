@@ -63,7 +63,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
 
     open var jumping: Bool = false
 
-    public let delegates: NSPointerArray = NSPointerArray.init(options: .weakMemory)
+    internal let delegates: NSPointerArray = NSPointerArray.init(options: .weakMemory)
     ///如果设置了dataSource, 则优先使用dataSource提供的数据
     open weak var dataSource: RXCPageViewDataSource?
 

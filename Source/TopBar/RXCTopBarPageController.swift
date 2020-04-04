@@ -10,6 +10,7 @@ open class RXCTopBarPageController: UIViewController, TitleScrollTopBarDataSourc
     open lazy var pageTopBar: UIView? = self.initPageTopBar()
     open lazy var pageView: RXCPageView = self.initPageView()
 
+    ///当前的ViewController, 默认没有didSet监听, 如果手动设置的话, 需要手动调用reloadData方法
     open var viewControllers: [UIViewController]
     open var page: Int
 
@@ -21,14 +22,8 @@ open class RXCTopBarPageController: UIViewController, TitleScrollTopBarDataSourc
     }
 
     open func initPageView()->RXCPageView {
-        //let viewClosures:[RXCPageView.ViewClosure] = self.viewControllers.map { (controller: UIViewController) -> RXCPageView.ViewClosure in
-        //    return {() in
-        //        return controller.view
-        //    }
-        //}
         let view: RXCPageView = RXCPageView(frame: CGRect.zero, page: self.page)
         view.dataSource = self
-        //view.viewClosures = viewClosures
         return view
     }
 
@@ -36,19 +31,18 @@ open class RXCTopBarPageController: UIViewController, TitleScrollTopBarDataSourc
         self.viewControllers = viewControllers
         self.page = page
         super.init(nibName: nil, bundle: nil)
-        self.viewControllers.forEach { (controller: UIViewController) in
-            self.addChild(controller)
-        }
     }
 
     public required init?(coder: NSCoder) {
-        fatalError()
+        self.viewControllers = coder.value(forKey: "viewControllers") as? [UIViewController] ?? []
+        self.page = coder.value(forKey: "page") as? Int ?? 0
+        super.init(coder: coder)
     }
 
     open override func viewDidLoad() {
         super.viewDidLoad()
         self.view.addSubview(self.pageView)
-        self.pageView.delegates.addPointer(Unmanaged.passUnretained(self).toOpaque())
+        self.pageView.addDelegate(self)
         if let bar: UIView = self.pageTopBar {
             self.view.addSubview(bar)
         }
@@ -68,7 +62,7 @@ open class RXCTopBarPageController: UIViewController, TitleScrollTopBarDataSourc
     }
 
     open func layoutPageTopBar() {
-        guard let bar: UIView = self.pageTopBar else {
+        guard let bar: UIView = self.pageTopBar, bar.superview == self.view else {
             return
         }
         let size: CGSize = bar.sizeThatFits(self.view.bounds.size)
@@ -81,10 +75,28 @@ open class RXCTopBarPageController: UIViewController, TitleScrollTopBarDataSourc
         }
     }
 
+    ///设置ViewController并且重新加载界面
+    ///
+    /// - Parameters:
+    ///   - viewControllers: 要加载的ViewController
+    ///   - page: 不为nil的话会设置page, 否则显示当前页
+    ///   - animated: 只是留一个接口, 暂时默认不进行动画
+    open func setViewControllers(_ viewControllers: [UIViewController], page: Int?, animated: Bool) {
+        self.viewControllers = viewControllers
+        if let page: Int = page {
+            self.pageView.currentPage = page
+        }else {
+            if self.pageView.currentPage >= viewControllers.count {
+                self.pageView.currentPage = viewControllers.count - 1
+            }
+        }
+        self.pageView.reloadViews()
+    }
+
     //MARK: - TitleScrollTopBarDataSource
 
     open func titleScrollTopBarNumberOfItems(_ topBar: TitleScrollTopBar) -> Int {
-        return self.viewControllers.count
+        self.viewControllers.count
     }
 
     open func titleScrollTopBar(_ topBar: TitleScrollTopBar, itemForPageAt page: Int) -> TopBarItem {
@@ -99,12 +111,18 @@ open class RXCTopBarPageController: UIViewController, TitleScrollTopBarDataSourc
     }
 
     //MARK: - RXCPageViewDataSource
+
     public func pageView(numberOfPages pageView: RXCPageView) -> Int {
         self.viewControllers.count
     }
 
     public func pageView(_ pageView: RXCPageView, viewAt page: Int) -> UIView {
-        self.viewControllers[page].view
+        let vc: UIViewController = self.viewControllers[page]
+        if vc.parent == nil {
+            self.addChild(vc)
+            vc.didMove(toParent: self)
+        }
+        return self.viewControllers[page].view
     }
 
     //MARK: - RXCPageViewDelegate
@@ -121,10 +139,14 @@ open class RXCTopBarPageController: UIViewController, TitleScrollTopBarDataSourc
 
     open func pageView(_ pageView: RXCPageView, didShowViewAt page: Int) {
         (self.pageTopBar as? RXCPageViewDelegate)?.pageView(pageView, didShowViewAt: page)
+        self.viewControllers[page].beginAppearanceTransition(true, animated: false)
+        self.viewControllers[page].endAppearanceTransition()
     }
 
     open func pageView(_ pageView: RXCPageView, didHideViewAt page: Int) {
         (self.pageTopBar as? RXCPageViewDelegate)?.pageView(pageView, didHideViewAt: page)
+        self.viewControllers[page].beginAppearanceTransition(false, animated: false)
+        self.viewControllers[page].endAppearanceTransition()
     }
 
     open func pageView(_ pageView: RXCPageView, didScrollWith event: RXCPageView.ScrollEvent) {
