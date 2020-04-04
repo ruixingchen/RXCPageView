@@ -57,7 +57,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     ///jumping期间的页面顺序
     open var rearrangedPageForJumping: [Int]?
 
-    open var currentPage: Int = 0
+    open var currentPage: Int
     open var lastContentOffset: CGFloat = 0
     open var lastVisibleVirtualPage: [Int] = []
 
@@ -68,13 +68,15 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     open weak var dataSource: RXCPageViewDataSource?
 
     public init(frame: CGRect, page: Int) {
-        super.init(frame: frame)
         self.currentPage = page
+        super.init(frame: frame)
         self.initSetup()
     }
 
     public required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        self.currentPage = 0
+        super.init(coder: coder)
+        self.initSetup()
     }
 
     open func initScrollView() -> UIScrollView {
@@ -114,7 +116,14 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
 
     open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == #keyPath(UIScrollView.contentOffset) && (object as? UIScrollView) == self.scrollView {
-            self.scrollViewContentOffsetDidChnage()
+            guard let newValue: CGPoint = change?[.newKey] as? CGPoint else {
+                return
+            }
+            let oldValue: CGPoint? = change?[.oldKey] as? CGPoint
+            if oldValue == nil || newValue != oldValue {
+                //这里必须要判断的确是发生了变化才可以通知, 否则会导致currentPage提前发生变化
+                self.scrollViewContentOffsetDidChange()
+            }
         } else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
@@ -124,6 +133,14 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
         let page: Int = self.currentPage //记录下当前的页数,防止更改contentSize之后当前页数发生变化
         self.scrollView.contentSize = CGSize(width: self.scrollView.bounds.width * CGFloat(self.numberOfPages()), height: self.scrollView.bounds.height)
         self.scroll(to: page, animated: false, allowJump: false)
+
+        if self.numberOfPages() > 0 {
+            if page == 0 && self.view(at: 0, includingRearranged: true).frame != self.frame(for: 0, viewPortSize: self.viewPortSize) {
+                //当是第一页的时候, 由于offset没有变化, 导致第0页不显示, 这里强制调用offsetDidChange, 让0页显示
+                self.scrollViewContentOffsetDidChange()
+            }
+        }
+
         self.finishJumping()
     }
 
@@ -399,7 +416,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
         }
     }
 
-    open func scrollViewContentOffsetDidChnage() {
+    open func scrollViewContentOffsetDidChange() {
         ///当处于jumping的时候无需进行通知
 
         let offset: CGFloat = scrollView.contentOffset.x
