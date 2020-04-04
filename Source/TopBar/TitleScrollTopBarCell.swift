@@ -90,15 +90,15 @@ extension TitleScrollTopBar {
         }
 
         open override func sizeThatFits(_ size: CGSize) -> CGSize {
-            return self.intrinsicContentSize
+            self.intrinsicContentSize
         }
 
         open override func systemLayoutSizeFitting(_ targetSize: CGSize) -> CGSize {
-            return self.intrinsicContentSize
+            self.intrinsicContentSize
         }
 
         open override func systemLayoutSizeFitting(_ targetSize: CGSize, withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority, verticalFittingPriority: UILayoutPriority) -> CGSize {
-            return self.intrinsicContentSize
+            self.intrinsicContentSize
         }
 
         open override func layoutSubviews() {

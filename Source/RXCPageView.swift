@@ -19,15 +19,30 @@ public protocol RXCPageViewDelegate: AnyObject {
 
 }
 
-public extension RXCPageView {
+public protocol RXCPageViewDataSource: AnyObject {
 
-    struct ScrollEvent {
+    func pageView(numberOfPages pageView: RXCPageView) -> Int
+    func pageView(_ pageView: RXCPageView, viewAt page: Int) -> UIView
+
+}
+
+extension RXCPageView {
+
+    public struct ScrollEvent {
         ///这个滚动事件是否是跳跃事件
-        var jumping: Bool
-        var animated: Bool
-        var toPage: Int
-        var fromPage: Int
-        var progress: CGFloat
+        public var jumping: Bool
+        public var animated: Bool
+        public var fromPage: Int
+        public var toPage: Int
+        public var progress: CGFloat
+
+        public init(jumping: Bool, animated: Bool, fromPage: Int, toPage: Int, progress: CGFloat) {
+            self.jumping = jumping
+            self.animated = animated
+            self.fromPage = fromPage
+            self.toPage = toPage
+            self.progress = progress
+        }
     }
 
 }
@@ -37,13 +52,10 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     public typealias ViewClosure = () -> UIView
 
     open lazy var scrollView: UIScrollView = self.initScrollView()
-    ///获取View的closure, 避免了初始化的时候立刻初始化这个view
-    open var viewClosures: [ViewClosure] {
-        didSet {
-            self.reloadViews()
-        }
-    }
-    open var viewClosuresForJumping: [ViewClosure]?
+
+    open var viewClosures: [ViewClosure] = []
+    ///jumping期间的页面顺序
+    open var rearrangedPageForJumping: [Int]?
 
     open var currentPage: Int = 0
     open var lastContentOffset: CGFloat = 0
@@ -52,9 +64,10 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     open var jumping: Bool = false
 
     public let delegates: NSPointerArray = NSPointerArray.init(options: .weakMemory)
+    ///如果设置了dataSource, 则优先使用dataSource提供的数据
+    open weak var dataSource: RXCPageViewDataSource?
 
-    public init(frame: CGRect, viewClosures: [ViewClosure], page: Int) {
-        self.viewClosures = viewClosures
+    public init(frame: CGRect, page: Int) {
         super.init(frame: frame)
         self.currentPage = page
         self.initSetup()
@@ -101,10 +114,10 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
 
     open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == #keyPath(UIScrollView.contentOffset) && (object as? UIScrollView) == self.scrollView {
-            guard let newValue = change?[.newKey] as? CGPoint else {
+            guard let newValue: CGPoint = change?[.newKey] as? CGPoint else {
                 return
             }
-            let oldValue = change?[.oldKey] as? CGPoint
+            let oldValue: CGPoint? = change?[.oldKey] as? CGPoint
             if oldValue == nil || newValue != oldValue {
                 self.scrollViewContentOffsetDidChnage()
             }
@@ -114,10 +127,29 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     }
 
     open func reloadViews() {
-        let page: Int = self.currentPage
-        self.scrollView.contentSize = CGSize(width: self.scrollView.bounds.width * CGFloat(self.viewClosures.count), height: self.scrollView.bounds.height)
+        let page: Int = self.currentPage //记录下当前的页数,防止更改contentSize之后当前页数发生变化
+        self.scrollView.contentSize = CGSize(width: self.scrollView.bounds.width * CGFloat(self.numberOfPages()), height: self.scrollView.bounds.height)
         self.scroll(to: page, animated: false, allowJump: false)
         self.finishJumping()
+    }
+
+    //MARK: - Delegate
+
+    open func addDelegate(_ delegate: AnyObject & RXCPageViewDelegate) {
+        let object: AnyObject = delegate
+        self.delegates.addPointer(Unmanaged.passUnretained(object).toOpaque())
+    }
+
+    open func removeDelegate(_ delegate: RXCPageViewDelegate) {
+        for i: Int in (0..<self.delegates.count).reversed() {
+            if let pointer: UnsafeMutableRawPointer = self.delegates.pointer(at: i) {
+                if let object: RXCPageViewDelegate = Unmanaged<AnyObject>.fromOpaque(pointer).takeUnretainedValue() as? RXCPageViewDelegate {
+                    if object === delegate {
+                        self.delegates.removePointer(at: i)
+                    }
+                }
+            }
+        }
     }
 
     open func enumerateDelegate(closure: (RXCPageViewDelegate) -> Void) {
@@ -131,8 +163,15 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
 
     //MARK: - 工具方法
 
+    open func numberOfPages() -> Int {
+        if let ds: RXCPageViewDataSource = self.dataSource {
+            return ds.pageView(numberOfPages: self)
+        }
+        return self.viewClosures.count
+    }
+
     open func frame(for page: Int, viewPortSize: CGSize) -> CGRect {
-        return CGRect(x: CGFloat(page) * viewPortSize.width, y: 0, width: viewPortSize.width, height: viewPortSize.height)
+        CGRect(x: CGFloat(page) * viewPortSize.width, y: 0, width: viewPortSize.width, height: viewPortSize.height)
     }
 
     open func offset(for page: Int, viewPortSize: CGSize) -> CGPoint {
@@ -164,7 +203,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
 
     ///just like the name says
     open func isPageVisible(_ page: Int, offset: CGFloat, viewPortSize: CGSize) -> Bool {
-        return self.visibleVirtualPages(offset: offset, viewPortSize: viewPortSize).contains(page)
+        self.visibleVirtualPages(offset: offset, viewPortSize: viewPortSize).contains(page)
     }
 
     /// returns the four part size if two pages visible
@@ -194,7 +233,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
 
     ///is there only one page visible?
     open func isFullPage(offset: CGFloat, viewPortSize: CGSize) -> Bool {
-        return fmod(offset, viewPortSize.width).isEqual(to: 0.0)
+        fmod(offset, viewPortSize.width).isEqual(to: 0.0)
     }
 
     ///calculate current page from offset
@@ -219,20 +258,23 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     }
 
     open var viewPortSize: CGSize {
-        return self.scrollView.bounds.size
+        self.scrollView.bounds.size
     }
 
     ///获取某一页的View, 这个方法没有安全措施, 自己确保page的合法性
-    open func view(at page: Int) -> UIView {
-        if let jumpingArray: [ViewClosure] = self.viewClosuresForJumping {
-            return jumpingArray[page]()
-        } else {
+    open func view(at page: Int, includingRearranged: Bool = true) -> UIView {
+        if let rearranged: [Int] = self.rearrangedPageForJumping, includingRearranged {
+            return self.view(at: rearranged[page], includingRearranged: false)
+        }
+        if let ds: RXCPageViewDataSource = self.dataSource {
+            return ds.pageView(self, viewAt: page)
+        }else {
             return self.viewClosures[page]()
         }
     }
 
     ///计算滑动的进度
-    open func swipeProgress(offset:CGFloat, fromPage:Int, toPage:Int)->CGFloat {
+    open func swipeProgress(offset: CGFloat, fromPage: Int, toPage: Int) -> CGFloat {
         let viewPortSize: CGSize = self.viewPortSize
         let fromPageFrame: CGRect = self.frame(for: fromPage, viewPortSize: viewPortSize)
         var fromPageMinX: CGFloat = fromPageFrame.minX
@@ -250,13 +292,13 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
         let viewPortSize: CGSize = self.viewPortSize
         if offset >= lastOffset  {
             //手指向左, 目标page + 1
-            let fromPage = lastOffset/viewPortSize.width < 0 ? -1 : Int(lastOffset/viewPortSize.width)
+            let fromPage: Int = lastOffset / viewPortSize.width < 0 ? -1 : Int(lastOffset / viewPortSize.width)
             let toPage: Int = fromPage + 1
             let progress: CGFloat = self.swipeProgress(offset: offset, fromPage: fromPage, toPage: toPage)
             #if (debug || DEBUG)
             print("生成滚动事件, 向左拖拽, form \(fromPage) to \(toPage) @ \(String.init(format: "%.2f", progress))")
             #endif
-            return ScrollEvent(jumping: false, animated: true, toPage: toPage, fromPage: fromPage, progress: progress)
+            return ScrollEvent(jumping: false, animated: true, fromPage: fromPage, toPage: toPage, progress: progress)
         }else {
             //手指向右, 目标page-1
             let fromPage = Int(ceil(lastOffset/viewPortSize.width))
@@ -265,14 +307,14 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
             #if (debug || DEBUG)
             print("生成滚动事件, 向右拖拽, form \(fromPage) to \(toPage) @ \(String.init(format: "%.2f", progress))")
             #endif
-            return ScrollEvent(jumping: false, animated: true, toPage: toPage, fromPage: fromPage, progress: progress)
+            return ScrollEvent(jumping: false, animated: true, fromPage: fromPage, toPage: toPage, progress: progress)
         }
     }
 
     //MARK: - 跳转
 
     open func scroll(to page: Int, animated: Bool, allowJump: Bool) {
-        guard page >= 0 && page < self.viewClosures.count else {
+        guard page >= 0 && page < self.numberOfPages() else {
             assertionFailure("page out of index, will not take any actions")
             return
         }
@@ -290,7 +332,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
             self.startJumping()
             self.scrollView.setContentOffset(targetOffset, animated: animated)
             //self.scrollViewDidScroll(self.scrollView)
-            let event = ScrollEvent(jumping: true, animated: animated, toPage: page, fromPage: fromPage, progress: 1.0)
+            let event = ScrollEvent(jumping: true, animated: animated, fromPage: fromPage, toPage: page, progress: 1.0)
             self.enumerateDelegate(closure: { $0.pageView(self, didScrollWith: event) })
             if !animated {
                 ///如果不动画的话, 立刻调用结束jumping
@@ -299,7 +341,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
         } else {
             self.startJumping()
             let fromPage: Int = self.currentPage
-            self.viewClosuresForJumping = self.viewClosures
+            self.rearrangedPageForJumping = (0..<self.numberOfPages()).map({ $0 })
             let tmpPage: Int
             if self.currentPage < page {
                 ///目标在右侧
@@ -309,7 +351,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
             } else {
                 tmpPage = page
             }
-            self.viewClosuresForJumping?[tmpPage] = self.viewClosures[self.currentPage]
+            self.rearrangedPageForJumping?[tmpPage] = currentPage
             self.scrollView.setContentOffset(self.offset(for: tmpPage, viewPortSize: self.viewPortSize), animated: false)
             self.scrollView.setContentOffset(self.offset(for: page, viewPortSize: self.viewPortSize), animated: animated)
             if !animated {
@@ -317,7 +359,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
                 self.finishJumping()
             }
             //生成scrollEvent
-            let event = ScrollEvent(jumping: true, animated: animated, toPage: page, fromPage: fromPage, progress: 1.0)
+            let event = ScrollEvent(jumping: true, animated: animated, fromPage: fromPage, toPage: page, progress: 1.0)
             self.enumerateDelegate(closure: { $0.pageView(self, didScrollWith: event) })
         }
     }
@@ -353,7 +395,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     open func finishJumping() {
         let previousJumping: Bool = self.jumping
         self.jumping = false
-        self.viewClosuresForJumping = nil
+        self.rearrangedPageForJumping = nil
         self.isUserInteractionEnabled = true
         self.lastContentOffset = self.scrollView.contentOffset.x
         self.lastVisibleVirtualPage = self.visibleVirtualPages(offset: self.scrollView.contentOffset.x, viewPortSize: self.viewPortSize)
@@ -390,12 +432,12 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
             print("当前可见:\(visiblePages), 上次可见:\(lastVisiblePages)")
             #endif
             for i: Int in lastVisiblePages {
-                if !visiblePages.contains(i) && (0..<self.viewClosures.count).contains(i) {
+                if !visiblePages.contains(i) && (0..<self.numberOfPages()).contains(i) {
                     self.hideView(at: i)
                 }
             }
             for i: Int in visiblePages {
-                if !lastVisiblePages.contains(i) && (0..<self.viewClosures.count).contains(i) {
+                if !lastVisiblePages.contains(i) && (0..<self.numberOfPages()).contains(i) {
                     self.showView(at: i)
                 }
             }

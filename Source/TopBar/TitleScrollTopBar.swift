@@ -84,7 +84,7 @@ open class TitleScrollTopBar: UIView, TopBar, RXCPageViewDelegate, UICollectionV
     }
 
     open override func sizeThatFits(_ size: CGSize) -> CGSize {
-        return CGSize(width: size.width, height: self.style.height)
+        CGSize(width: size.width, height: self.style.height)
     }
 
     open override func layoutSubviews() {
@@ -299,7 +299,7 @@ open class TitleScrollTopBar: UIView, TopBar, RXCPageViewDelegate, UICollectionV
     //MARK: - CollectionView
 
     open func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.dataSource?.titleScrollTopBarNumberOfItems(self) ?? 0
+        self.dataSource?.titleScrollTopBarNumberOfItems(self) ?? 0
     }
 
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
