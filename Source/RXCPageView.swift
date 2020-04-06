@@ -71,6 +71,10 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     ///如果设置了dataSource, 则优先使用dataSource提供的数据
     open weak var dataSource: RXCPageViewDataSource?
 
+    deinit {
+        self.scrollView.removeObserver(self, forKeyPath: #keyPath(UIScrollView.contentOffset))
+    }
+
     public init(frame: CGRect, page: Int) {
         self.currentPage = page
         super.init(frame: frame)
