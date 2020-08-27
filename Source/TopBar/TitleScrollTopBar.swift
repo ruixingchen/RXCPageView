@@ -134,7 +134,7 @@ open class TitleScrollTopBar: UIView, TopBar, RXCPageViewDelegate, UICollectionV
         if let view = self.backgroundView {
             let x: CGFloat = 0
             let y: CGFloat
-            if !self.style.backgroundViewFillTopAera {
+            if self.style.backgroundViewFillTopAera {
                 y = -self.frame.origin.y
             }else {
                 y = 0
