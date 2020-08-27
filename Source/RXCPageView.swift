@@ -143,7 +143,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
         self.scroll(to: page, animated: false, allowJump: false)
 
         if self.numberOfPages() > 0 {
-            if page == 0 && self.view(at: 0, includingRearranged: true).frame != self.frame(for: 0, viewPortSize: self.viewPortSize) {
+            if page == 0 {
                 //当是第一页的时候, 由于offset没有变化, 导致第0页不显示, 这里强制让第0页显示
                 self.layoutPageView(force: true)
             }
@@ -388,7 +388,9 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     open func showView(at page: Int) {
         let pageView: UIView = self.view(at: page)
         let frame: CGRect = self.frame(for: page, viewPortSize: self.viewPortSize)
-        pageView.frame = frame
+        if pageView.frame != frame {
+            pageView.frame = frame
+        }
         if pageView.superview == nil {
             self.scrollView.addSubview(pageView)
         }
@@ -443,7 +445,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
         let lastVisiblePages: [Int] = self.lastVisibleVirtualPage
         print("当前可见:\(visiblePages), 上次可见:\(lastVisiblePages)")
         #endif
-        
+
         self.layoutPageView()
 
         self.lastContentOffset = offset
@@ -456,7 +458,7 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
             }
         }
     }
-    
+
     ///布局当前可见的页面
     open func layoutPageView(force:Bool=false) {
         let visiblePages: [Int] = self.visibleVirtualPages(offset: self.scrollView.contentOffset.x, viewPortSize: self.viewPortSize)
@@ -493,3 +495,4 @@ open class RXCPageView: UIView, UIScrollViewDelegate {
     }
 
 }
+
