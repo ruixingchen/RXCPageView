@@ -45,6 +45,9 @@ open class TitleScrollTopBarStyle {
     ///cell的宽度offset, 即左右两边的边距
     open var cellContentHorizontalInset: CGFloat = 16
 
+    ///backgroundView填充TopBar顶部的部分
+    open var backgroundViewFillTopAera:Bool = false
+
     ///自定义的Cell类型
     open var cellType: ((TitleScrollTopBarCell&UICollectionViewCell).Type)?
     ///生成自定义的CollectionView

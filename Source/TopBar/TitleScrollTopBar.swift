@@ -18,6 +18,8 @@ open class TitleScrollTopBar: UIView, TopBar, RXCPageViewDelegate, UICollectionV
 
     open weak var dataSource: TitleScrollTopBarDataSource?
 
+    ///背景View, 可选
+    open lazy var backgroundView: UIView? = self.initBackgroundView()
     open lazy var collectionView: UICollectionView = self.initCollectionView(style: self.style)
     open lazy var indicatorView: UIView = self.initIndicatorView(style: self.style)
     open var hairlineView: UIView = UIView()
@@ -76,8 +78,16 @@ open class TitleScrollTopBar: UIView, TopBar, RXCPageViewDelegate, UICollectionV
         return view
     }
 
+    open func initBackgroundView()->UIView? {
+        return UIView()
+    }
+
     open func initSetup() {
-        self.backgroundColor = self.style.backgroundColor
+        //self.backgroundColor = self.style.backgroundColor
+        self.backgroundView?.backgroundColor = self.style.backgroundColor
+        if let bkv = self.backgroundView {
+            self.insertSubview(bkv, at: 0)
+        }
 
         self.addSubview(self.collectionView)
 
@@ -95,6 +105,7 @@ open class TitleScrollTopBar: UIView, TopBar, RXCPageViewDelegate, UICollectionV
         super.layoutSubviews()
         self.layoutCollectionView()
         self.layoutHairlineView()
+        self.layoutBackgroundView()
     }
 
     open func layoutHairlineView() {
@@ -117,6 +128,21 @@ open class TitleScrollTopBar: UIView, TopBar, RXCPageViewDelegate, UICollectionV
         self.cellSizes = self.calculateExpandedCellSize()
         self.collectionView.collectionViewLayout.invalidateLayout()
         self.collectionView.layoutIfNeeded()
+    }
+
+    open func layoutBackgroundView() {
+        if let view = self.backgroundView {
+            let x: CGFloat = 0
+            let y: CGFloat
+            if !self.style.backgroundViewFillTopAera {
+                y = -self.frame.origin.y
+            }else {
+                y = 0
+            }
+            let additionalHeight = self.bounds.origin.y - y
+            let height = self.frame.height + additionalHeight
+            view.frame = CGRect(x: x, y: y, width: self.bounds.width, height: height)
+        }
     }
 
     open func reloadData() {
