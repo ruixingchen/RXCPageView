@@ -1,0 +1,36 @@
+PODS:
+  - LookinServer (1.0.0)
+  - SDWebImage (5.10.2):
+    - SDWebImage/Core (= 5.10.2)
+  - SDWebImage/Core (5.10.2)
+  - YYImage (1.0.4):
+    - YYImage/Core (= 1.0.4)
+  - YYImage/Core (1.0.4)
+
+DEPENDENCIES:
+  - LookinServer
+  - SDWebImage
+  - YYImage (from `https://github.com/QiuYeHong90/YYImage.git`)
+
+SPEC REPOS:
+  trunk:
+    - LookinServer
+    - SDWebImage
+
+EXTERNAL SOURCES:
+  YYImage:
+    :git: https://github.com/QiuYeHong90/YYImage.git
+
+CHECKOUT OPTIONS:
+  YYImage:
+    :commit: 4164acb76e8979c0612530bd874e099a1fa51e9d
+    :git: https://github.com/QiuYeHong90/YYImage.git
+
+SPEC CHECKSUMS:
+  LookinServer: 0002891cd3cec5e082a910e897dfe71b4f06b89e
+  SDWebImage: b969dcfc02c40a5da71eac0b03b8f1a0c794a86f
+  YYImage: 20ec986d18a8d0ad421619d166a9e628097e2433
+
+PODFILE CHECKSUM: 8408fbc57b7843ec70c4b8a073defed2e1e3076b
+
+COCOAPODS: 1.10.0
