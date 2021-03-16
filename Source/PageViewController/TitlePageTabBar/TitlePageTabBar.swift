@@ -69,10 +69,10 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
         collectionView.delegate = self
         collectionView.register(TitlePageTabBarTextCell.self, forCellWithReuseIdentifier: "textCell")
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.showsLargeContentViewer = false
+        collectionView.showsVerticalScrollIndicator = false
         #if (debug || DEBUG)
         collectionView.showsHorizontalScrollIndicator = true
-        collectionView.showsLargeContentViewer = true
+        collectionView.showsVerticalScrollIndicator = true
         #endif
         return collectionView
     }

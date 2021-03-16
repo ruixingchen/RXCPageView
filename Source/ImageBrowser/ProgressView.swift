@@ -70,7 +70,7 @@ public final class ProgressView: UIView {
 
         self.isUserInteractionEnabled = false
 
-        self.titleLabel.font = UIFont.monospacedSystemFont(ofSize: 15, weight: .regular)
+        self.titleLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 15, weight: .regular)
         self.titleLabel.minimumScaleFactor = 0.3
         self.titleLabel.adjustsFontSizeToFitWidth = true
         self.titleLabel.adjustsFontForContentSizeCategory = false
