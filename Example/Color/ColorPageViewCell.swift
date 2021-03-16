@@ -18,6 +18,10 @@ class ColorPageViewCell: UICollectionViewCell, PageViewCell {
         self.titleLabel.text = page.description
     }
 
+    func didEndDisplaying(at indexPath: IndexPath) {
+
+    }
+
     override func layoutSubviews() {
         super.layoutSubviews()
         let size = self.titleLabel.intrinsicContentSize

@@ -107,18 +107,14 @@ open class PageViewController: UIViewController, PageViewDataSource, PageViewDel
 
     open func pageView(_ pageView: PageView, willDisplayPageAt page: Int, cell: PageViewCell) {
         let vc = self.viewControllers[page]
-        if vc.parent == nil {
-            self.addChild(self.viewControllers[page])
-            self.viewControllers[page].didMove(toParent: self)
+        if vc.parent != self {
+            self.addChild(vc)
+            vc.didMove(toParent: self)
         }
     }
 
     open func pageView(_ pageView: PageView, didEndDsiplayingPageAt page: Int, cell: PageViewCell) {
-        let vc = self.viewControllers[page]
-        if vc.parent != nil {
-            vc.willMove(toParent: nil)
-            vc.removeFromParent()
-        }
+
     }
 
     open func pageViewDidReloadData(_ pageView: PageView) {

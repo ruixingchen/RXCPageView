@@ -16,7 +16,8 @@ open class PageView: UIView, UICollectionViewDataSource, UICollectionViewDelegat
     let scrollDirection: UICollectionView.ScrollDirection
 
     ///悬浮View管理器, 需要在PageView被添加到superView之前赋值, 之后赋值的无效
-    open var floatingViewManagers:[PageViewFloatingViewManager] = []
+    ///这个属性暂时支持的不好, 不要使用
+    internal var floatingViewManagers:[PageViewFloatingViewManager] = []
 
     open weak var dataSource: PageViewDataSource?
     internal let delegates:NSPointerArray = NSPointerArray.init(options: .weakMemory)
@@ -379,12 +380,11 @@ open class PageView: UIView, UICollectionViewDataSource, UICollectionViewDelegat
 
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if let _cell = cell as? PageViewCell {
-            //先绑定数据
-            if let pageData = self.wormholeJumpDataSource[indexPath.item] ?? self.dataSource?.pageView(self, pageDataAt: indexPath.item) {
-                _cell.bindPageData(pageData, at: indexPath.item)
-            }
             self.delegates.forEach { (delegate: PageViewDelegate) in
                 delegate.pageView(self, willDisplayPageAt: indexPath.item, cell: _cell)
+            }
+            if let pageData = self.wormholeJumpDataSource[indexPath.item] ?? self.dataSource?.pageView(self, pageDataAt: indexPath.item) {
+                _cell.bindPageData(pageData, at: indexPath.item)
             }
         }
     }
@@ -394,6 +394,7 @@ open class PageView: UIView, UICollectionViewDataSource, UICollectionViewDelegat
             self.delegates.forEach { (delegate: PageViewDelegate) in
                 delegate.pageView(self, didEndDsiplayingPageAt: indexPath.item, cell: _cell)
             }
+            _cell.didEndDisplaying(at: indexPath)
         }
     }
 
@@ -438,7 +439,6 @@ open class PageView: UIView, UICollectionViewDataSource, UICollectionViewDelegat
         self.isUserInteractionEnabled = true
         self.wormholeJumpDataSource.removeAll()
         self.enumerateScrollEventReceivers(closure: {$0.pageViewDidEndScrolling(self)})
-
     }
 
 }

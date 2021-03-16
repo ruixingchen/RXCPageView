@@ -15,7 +15,13 @@ open class ViewControllerPageViewCell: UICollectionViewCell, PageViewCell {
     open func bindPageData(_ pageData: PageData, at page: Int) {
         guard let data = pageData as? ViewControllerPageData else {return}
         self.bindedViewController = data.viewController
-        self.contentView.addSubview(data.viewController.view)
+        data.viewController.beginAppearanceTransition(true, animated: false)
+        if data.viewController.view.superview != self.contentView {
+            data.viewController.view.removeFromSuperview()
+            self.contentView.addSubview(data.viewController.view)
+        }
+        data.viewController.endAppearanceTransition()
+
         self.setNeedsLayout()
     }
 
@@ -26,11 +32,12 @@ open class ViewControllerPageViewCell: UICollectionViewCell, PageViewCell {
         }
     }
 
-    open override func prepareForReuse() {
-        super.prepareForReuse()
-        if let vc = self.bindedViewController, vc.isViewLoaded, vc.view.superview == self.contentView {
-            vc.view.removeFromSuperview()
-        }
+    open func didEndDisplaying(at indexPath: IndexPath) {
+        guard let vc = self.bindedViewController else {return}
+        vc.beginAppearanceTransition(false, animated: false)
+        vc.view.removeFromSuperview()
+        vc.endAppearanceTransition()
+        self.bindedViewController = nil
     }
 
 }

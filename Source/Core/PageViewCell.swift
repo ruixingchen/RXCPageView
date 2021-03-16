@@ -11,4 +11,6 @@ public protocol PageViewCell where Self: UICollectionViewCell {
 
     func bindPageData(_ pageData: PageData, at page: Int)
 
+    func didEndDisplaying(at indexPath: IndexPath)
+
 }

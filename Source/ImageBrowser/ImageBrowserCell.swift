@@ -140,6 +140,10 @@ open class ImageBrowserCell: UICollectionViewCell, PageViewCell, UIScrollViewDel
         self.progressView?.onTaskFinish()
     }
 
+    open func didEndDisplaying(at indexPath: IndexPath) {
+
+    }
+
     open func bindImage(image: Image) {
         (self.imageContentView as? UIImageView)?.image = image.image
         self.imageSize = image.image?.size ?? CGSize.init(width: 10, height: 10)
