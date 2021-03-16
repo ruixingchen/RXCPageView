@@ -7,4 +7,13 @@
 
 import UIKit
 
-public typealias PageTabBarItem = UITabBarItem
+///子类可以继承后添加更多属性
+open class PageTabBarItem {
+
+    open var title: String?
+
+    public init(title: String?) {
+        self.title = title
+    }
+
+}

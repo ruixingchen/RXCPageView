@@ -1,8 +1,8 @@
 PODS:
   - LookinServer (1.0.0)
-  - SDWebImage (5.10.2):
-    - SDWebImage/Core (= 5.10.2)
-  - SDWebImage/Core (5.10.2)
+  - SDWebImage (5.10.4):
+    - SDWebImage/Core (= 5.10.4)
+  - SDWebImage/Core (5.10.4)
   - YYImage (1.0.4):
     - YYImage/Core (= 1.0.4)
   - YYImage/Core (1.0.4)
@@ -28,9 +28,9 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   LookinServer: 0002891cd3cec5e082a910e897dfe71b4f06b89e
-  SDWebImage: b969dcfc02c40a5da71eac0b03b8f1a0c794a86f
+  SDWebImage: c666b97e1fa9c64b4909816a903322018f0a9c84
   YYImage: 20ec986d18a8d0ad421619d166a9e628097e2433
 
-PODFILE CHECKSUM: 8408fbc57b7843ec70c4b8a073defed2e1e3076b
+PODFILE CHECKSUM: 177dec666cd026be58fd98c9eeec8d0335bdd1f1
 
 COCOAPODS: 1.10.0

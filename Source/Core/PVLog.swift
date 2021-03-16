@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct PVLog {
+internal struct PVLog {
 
-    static func verbose(_ closure: @autoclosure ()->Any) {
+    internal static func verbose(_ closure: @autoclosure ()->Any) {
         #if (debug || DEBUG)
         print(String.init(describing: closure()))
         #endif

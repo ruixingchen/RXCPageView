@@ -7,7 +7,7 @@
 
 import UIKit
 
-internal extension UIView {
+public extension UIView {
 
     func snapshot(in rect: CGRect? = nil, afterScreenUpdates: Bool = false) -> UIImage {
         return UIGraphicsImageRenderer.init(bounds: rect ?? self.bounds).image { (context) in

@@ -9,13 +9,6 @@ target 'Example' do
   pod 'LookinServer'
   pod 'SDWebImage'
   pod 'YYImage', :git => 'https://github.com/QiuYeHong90/YYImage.git'
-
-end
-
-target 'RXCPageView' do
-  # Comment the next line if you don't want to use dynamic frameworks
-  use_frameworks!
-
-  # Pods for RXCPageView
+  #pod 'RXCPageView', :path=> '../'
 
 end

@@ -16,14 +16,14 @@ open class ImageBrowserViewController: UIViewController, PageViewDataSourcePrefe
 
     open lazy var browser: ImageBrowser = self.initBrowser()
 
-    public var imagePageDatas:[ImagePageData] {
+    open var imagePageDatas:[ImagePageData] {
         didSet {
             self.browser.reloadData()
         }
     }
     public let initialPage: Int
 
-    weak var delegate: ImageBrowserViewControllerDelegate?
+    open weak var delegate: ImageBrowserViewControllerDelegate?
 
     //open lazy var animatedTransitioning: ZoomAnimatedTransitioning? = ZoomAnimatedTransitioning.init()
 

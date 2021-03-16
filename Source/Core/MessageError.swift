@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct MessageError: Error, LocalizedError {
+internal struct MessageError: Error, LocalizedError {
 
     var message: String
 

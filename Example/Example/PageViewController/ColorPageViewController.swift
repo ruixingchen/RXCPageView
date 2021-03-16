@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RXCPageView
 
 class ColorPageViewController: PageViewController {
 
@@ -25,7 +26,11 @@ class ColorPageViewController: PageViewController {
 
     override func initPageTabBar() -> PageTabBar? {
         let bar = super.initPageTabBar()
-        (bar as? TitlePageTabBar)?.layoutMode = .equal
+        if let _bar = bar as? TitlePageTabBar {
+            _bar.layoutMode = .equal
+            _bar.cellStyle.textColor = UIColor.blue
+            _bar.cellStyle.highlightTextColor = UIColor.cyan
+        }
         return bar
     }
 

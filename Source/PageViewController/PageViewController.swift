@@ -36,8 +36,8 @@ open class PageViewController: UIViewController, PageViewDataSource, PageViewDel
     }
 
     open func initPageTabBar()->PageTabBar? {
-        let items = self.viewControllers.map({PageTabBarItem.init(title: $0.title, image: nil, tag: 0)})
-        let bar = TitlePageTabBar.init(items: items, style: nil)
+        let items = self.viewControllers.map({PageTabBarItem.init(title: $0.title)})
+        let bar = TitlePageTabBar.init(items: items, cellStyle: nil)
         bar.layoutMode = .natural
         bar.delegate = self
         return bar

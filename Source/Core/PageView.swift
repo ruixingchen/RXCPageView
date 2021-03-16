@@ -13,13 +13,14 @@ open class PageView: UIView, UICollectionViewDataSource, UICollectionViewDelegat
 
     open lazy var collectionView: UICollectionView = self.initCollectionView()
 
-    let scrollDirection: UICollectionView.ScrollDirection
+    public let scrollDirection: UICollectionView.ScrollDirection
 
     ///悬浮View管理器, 需要在PageView被添加到superView之前赋值, 之后赋值的无效
     ///这个属性暂时支持的不好, 不要使用
     internal var floatingViewManagers:[PageViewFloatingViewManager] = []
 
     open weak var dataSource: PageViewDataSource?
+    
     internal let delegates:NSPointerArray = NSPointerArray.init(options: .weakMemory)
     internal let scrollEventReceivers:NSPointerArray = NSPointerArray.init(options: .weakMemory)
     internal let prefetchingDelegates:NSPointerArray = NSPointerArray.init(options: .weakMemory)

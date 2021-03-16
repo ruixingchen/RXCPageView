@@ -25,7 +25,7 @@ open class TitlePageTabBarTextCell: UICollectionViewCell, TitlePageTabBarCell {
         self.contentView.addSubview(self.titleLabel)
     }
 
-    public func highlight(percentage: CGFloat, with item: PageTabBarItem, style: TitlePageTabBarStyle) {
+    public func highlight(percentage: CGFloat, with item: PageTabBarItem, style: TitlePageTabBarCellStyle) {
         self.titleLabel.text = item.title
         self.titleLabel.font = style.font
         self.titleLabel.textColor = self.calculateTextColor(percentage: percentage, style: style)
@@ -33,7 +33,7 @@ open class TitlePageTabBarTextCell: UICollectionViewCell, TitlePageTabBarCell {
         self.layoutIfNeeded()
     }
 
-    open func calculateTextColor(percentage: CGFloat, style: TitlePageTabBarStyle)->UIColor {
+    open func calculateTextColor(percentage: CGFloat, style: TitlePageTabBarCellStyle)->UIColor {
         var fromR:CGFloat=0, fromG:CGFloat=0, fromB:CGFloat=0, fromA:CGFloat=0
         style.textColor.getRed(&fromR, green: &fromG, blue: &fromB, alpha: &fromA)
         var toR:CGFloat=0, toG:CGFloat=0, toB:CGFloat=0, toA:CGFloat=0

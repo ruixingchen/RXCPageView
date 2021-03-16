@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RXCPageView
 
 class ColorPageViewCell: UICollectionViewCell, PageViewCell {
 

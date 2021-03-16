@@ -10,7 +10,7 @@ import UIKit
 ///PageViewController用来显示一个ViewController的Cell, 会将Cell添加到contentView上
 open class ViewControllerPageViewCell: UICollectionViewCell, PageViewCell {
 
-    weak var bindedViewController: UIViewController?
+    public weak var bindedViewController: UIViewController?
 
     open func bindPageData(_ pageData: PageData, at page: Int) {
         guard let data = pageData as? ViewControllerPageData else {return}

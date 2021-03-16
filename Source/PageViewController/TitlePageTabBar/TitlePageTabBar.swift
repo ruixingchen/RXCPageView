@@ -26,7 +26,7 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
     open var indicatorFixedWidth:CGFloat?
 
     ///控制Cell的样式
-    open var style: TitlePageTabBarStyle = TitlePageTabBarStyle.init()
+    open var cellStyle: TitlePageTabBarCellStyle = TitlePageTabBarCellStyle.init()
 
     open var layoutMode: LayoutMode = .expand {
         didSet {
@@ -77,11 +77,11 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
         return collectionView
     }
 
-    public init(items:[PageTabBarItem], style: TitlePageTabBarStyle?) {
+    public init(items:[PageTabBarItem], cellStyle: TitlePageTabBarCellStyle?) {
         self.items = items
         super.init(frame: CGRect.zero)
-        if let _style = style {
-            self.style = _style
+        if let _style = cellStyle {
+            self.cellStyle = _style
         }
         self.initSetup()
     }
@@ -197,7 +197,7 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
         let item = self.items[page]
         guard let title = item.title else {return CGSize.init(width: 24, height: self.barHeight)}
         let text = NSMutableAttributedString.init(string: title)
-        text.addAttribute(.font, value: self.style.font, range: NSRange.init(location: 0, length: text.length))
+        text.addAttribute(.font, value: self.cellStyle.font, range: NSRange.init(location: 0, length: text.length))
         var size = text.size()
         size.width += 16
         size.height = self.barHeight - 0.1
@@ -308,7 +308,7 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
     open func updateVisibleCellHighlight() {
         for i in self.collectionView.indexPathsForVisibleItems {
             if let cell = self.collectionView.cellForItem(at: i) {
-                (cell as? TitlePageTabBarCell)?.highlight(percentage: self.cellHighlightPercentages[i.item], with: self.items[i.item], style: self.style)
+                (cell as? TitlePageTabBarCell)?.highlight(percentage: self.cellHighlightPercentages[i.item], with: self.items[i.item], style: self.cellStyle)
             }
         }
     }
@@ -385,7 +385,7 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
 
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         //即将要显示的时候更新Cell的状态
-        (cell as? TitlePageTabBarCell)?.highlight(percentage: self.cellHighlightPercentages[indexPath.item], with: self.items[indexPath.item], style: self.style)
+        (cell as? TitlePageTabBarCell)?.highlight(percentage: self.cellHighlightPercentages[indexPath.item], with: self.items[indexPath.item], style: self.cellStyle)
     }
 
     open func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

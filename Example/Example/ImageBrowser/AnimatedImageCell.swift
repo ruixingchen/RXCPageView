@@ -8,6 +8,7 @@
 import UIKit
 import SDWebImage
 import YYImage
+import RXCPageView
 
 class AnimatedImageCell: ImageBrowserCell {
 
