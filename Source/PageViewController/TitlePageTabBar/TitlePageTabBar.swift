@@ -30,13 +30,13 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
 
     open var layoutMode: LayoutMode = .expand {
         didSet {
-            self.reloadData()
+            if self.collectionView.bounds.width > 0 { self.reloadData() }
         }
     }
 
     open var items:[PageTabBarItem] {
         didSet {
-            self.reloadData()
+            if self.collectionView.bounds.width > 0 { self.reloadData() }
         }
     }
 
@@ -135,11 +135,11 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
         let x = self.bounds.minX
         let y = self.bounds.maxY - self.barHeight
         let frame = CGRect.init(x: x, y: y, width: self.bounds.width, height: self.barHeight)
-        if self.lastCollectionViewFrame != frame {
+        if frame != self.lastCollectionViewFrame {
             self.lastCollectionViewFrame = frame
             self.reloadData()
+            self.collectionView.frame = frame
         }
-        self.collectionView.frame = frame
         if let event = self.lastScrollEvent {
             self.updateAppearance(event: event)
         }else {
@@ -163,7 +163,7 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
         return CGSize.init(width: size.width, height: self.barHeight)
     }
 
-    ///重新计算数据, 只重新计算数据而不更新外观
+    ///重新计算数据, 并且重新加载数据
     open func reloadData() {
         self.cellSizes = self.calculateStretchedCellSize()
         self.collectionView.reloadData()
@@ -214,10 +214,9 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
             //所有Cell宽度都相等
             let contentWidth: CGFloat
             if let flow = self.collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
-                //注意这里不可以使用collectionView.bounds.width计算, 会造成数据循环依赖
                 contentWidth = self.bounds.width - flow.sectionInset.left - flow.sectionInset.right - flow.minimumLineSpacing*CGFloat(self.items.count-1)
             }else {
-                contentWidth = self.collectionView.bounds.width
+                contentWidth = self.bounds.width
             }
             let cellWidth = contentWidth/CGFloat(self.items.count)
             return self.items.map({ _ in
@@ -227,9 +226,9 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
             //拉伸Cell的宽度
             let contentWidth: CGFloat
             if let flow = self.collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
-                contentWidth = self.collectionView.bounds.width - flow.sectionInset.left - flow.sectionInset.right - flow.minimumLineSpacing*CGFloat(self.items.count-1)
+                contentWidth = self.bounds.width - flow.sectionInset.left - flow.sectionInset.right - flow.minimumLineSpacing*CGFloat(self.items.count-1)
             }else {
-                contentWidth = self.collectionView.bounds.width
+                contentWidth = self.bounds.width
             }
             let allItemWidth = itemSizes.reduce(0, {$0+$1.width})
             if allItemWidth >= contentWidth {return itemSizes}
@@ -275,7 +274,15 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
             //两页可见
             let left = event.visiblePages.min(by: {$0.page < $1.page})!
             let right = event.visiblePages.max(by: {$0.page < $1.page})!
-            let percentage = right.visibleSize(with: event.scrollDirection) / right.invisibleSize(with: event.scrollDirection)
+            let percentage: CGFloat
+            switch event.scrollDirection {
+            case .horizontal:
+               percentage = right.visibleSize(with: event.scrollDirection) / right.frame.width
+            case .vertical:
+               percentage = right.visibleSize(with: event.scrollDirection) / right.frame.height
+            @unknown default:
+                percentage = right.visibleSize(with: event.scrollDirection) / right.frame.width
+            }
             percentages[right.page] = percentage
             percentages[left.page] = 1-percentage
         }else {
@@ -356,6 +363,7 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
 
     open func updateCellHighlight(event: ScrollEvent) {
         self.cellHighlightPercentages = self.calculateCellHighlightPercentage(event: event)
+        PVLog.verbose("计算所有cell高亮状态: \(self.cellHighlightPercentages)")
         self.updateVisibleCellHighlight()
     }
 

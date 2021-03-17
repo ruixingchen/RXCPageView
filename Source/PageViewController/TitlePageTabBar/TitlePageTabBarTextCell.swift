@@ -34,11 +34,32 @@ open class TitlePageTabBarTextCell: UICollectionViewCell, TitlePageTabBarCell {
     }
 
     open func calculateTextColor(percentage: CGFloat, style: TitlePageTabBarCellStyle)->UIColor {
+        if #available(iOS 13, *) {
+            let light = self.calculateColor(from: style.textColor.resolvedColor(with: UITraitCollection.init(userInterfaceStyle: .light)), to: style.highlightTextColor.resolvedColor(with: UITraitCollection.init(userInterfaceStyle: .light)), progress: percentage)
+            let dark = self.calculateColor(from: style.textColor.resolvedColor(with: UITraitCollection.init(userInterfaceStyle: .dark)), to: style.highlightTextColor.resolvedColor(with: UITraitCollection.init(userInterfaceStyle: .dark)), progress: percentage)
+            return UIColor.init { (trait) -> UIColor in
+                switch trait.userInterfaceStyle {
+                case .light:
+                    return light
+                case .dark:
+                    return dark
+                case .unspecified:
+                    return light
+                @unknown default:
+                    return light
+                }
+            }
+        } else {
+            return self.calculateColor(from: style.textColor, to: style.highlightTextColor, progress: percentage)
+        }
+    }
+
+    open func calculateColor(from: UIColor, to: UIColor, progress: CGFloat)->UIColor {
         var fromR:CGFloat=0, fromG:CGFloat=0, fromB:CGFloat=0, fromA:CGFloat=0
-        style.textColor.getRed(&fromR, green: &fromG, blue: &fromB, alpha: &fromA)
+        from.getRed(&fromR, green: &fromG, blue: &fromB, alpha: &fromA)
         var toR:CGFloat=0, toG:CGFloat=0, toB:CGFloat=0, toA:CGFloat=0
-        style.highlightTextColor.getRed(&toR, green: &toG, blue: &toB, alpha: &toA)
-        let color = UIColor(red: fromR+(toR-fromR)*percentage, green: fromG+(toG-fromG)*percentage, blue: fromB+(toB-fromB)*percentage, alpha: fromA+(toA-fromA)*percentage)
+        to.getRed(&toR, green: &toG, blue: &toB, alpha: &toA)
+        let color = UIColor(red: fromR+(toR-fromR)*progress, green: fromG+(toG-fromG)*progress, blue: fromB+(toB-fromB)*progress, alpha: fromA+(toA-fromA)*progress)
         return color
     }
 
