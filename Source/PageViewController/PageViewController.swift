@@ -74,6 +74,12 @@ open class PageViewController: UIViewController, PageViewDataSource, PageViewDel
         self.layoutPageTabBar()
     }
 
+    open override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        self.view.setNeedsLayout()
+        self.view.layoutIfNeeded()
+    }
+
     open func layoutPageTabBar() {
         if let bar = self.pageTabBar {
             let size = bar.barSize(thatFits: self.view.bounds.size)
