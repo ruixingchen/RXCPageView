@@ -2,7 +2,7 @@
 // Created by ruixingchen on 2021/1/30.
 //
 
-import UIKit
+import Foundation
 
 ///描述一个图片的缓存对象,可以直接从内存中获取图片数据
 public protocol ImageCache {
