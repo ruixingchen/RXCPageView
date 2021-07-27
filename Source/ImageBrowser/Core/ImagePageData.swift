@@ -25,11 +25,9 @@ open class ImagePageData: PageData {
     open var thumbnailImageResource: ImageResource?
     //原图的资源
     open var originalImageResource: ImageResource
-    ///高清图的资源, 一般无需使用
-    //open var highQualityImageResource: ImageResource?
 
     ///图片的缓存管理对象
-    open var imageCache: ImageCache?
+    open var imageCache: ImageCache = NoneImageCache()
     ///图片的下载器
     open var imageDownloader: ImageDownloader = CommonImageDwonloader.init()
 
@@ -50,30 +48,28 @@ open class ImagePageData: PageData {
     }
 
     ///常见的初始化方式
-    public convenience init(url: URL, thumbnail: URL) {
+    public convenience init(url: URL, thumbnail: URL?) {
         let resource = ImageResource.init(url: url)
         self.init(imageResource: resource)
-        self.thumbnailImageResource = ImageResource.init(url: thumbnail)
+        if let _url = thumbnail {
+            self.thumbnailImageResource = ImageResource.init(url: _url)
+        }
     }
 
     //MARK: - Query
 
     ///读取缩略图的缓存
     open func queryThumbnailImage(completion: @escaping (Image?)->Void) {
-        guard let cache = self.imageCache, let resource = self.thumbnailImageResource else {
+        guard let resource = self.thumbnailImageResource else {
             completion(nil)
             return
         }
-        cache.retrieveImage(for: resource, completion: completion)
+        self.imageCache.retrieveImage(for: resource, completion: completion)
     }
 
     ///读取原图的缓存
     open func queryOriginalImage(completion: @escaping (Image?)->Void) {
-        guard let cache = self.imageCache else {
-            completion(nil)
-            return
-        }
-        cache.retrieveImage(for: self.originalImageResource, completion: completion)
+        self.imageCache.retrieveImage(for: self.originalImageResource, completion: completion)
     }
 
     //MARK: - Download

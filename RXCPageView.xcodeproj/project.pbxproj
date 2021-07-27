@@ -52,6 +52,7 @@
 		800EE5A32601162000FF4B8C /* TitlePageTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 800EE5772601162000FF4B8C /* TitlePageTabBar.swift */; };
 		800EE5A42601162000FF4B8C /* TitlePageTabBar+Enum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 800EE5782601162000FF4B8C /* TitlePageTabBar+Enum.swift */; };
 		800EE5A52601162000FF4B8C /* TitlePageTabBarDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 800EE5792601162000FF4B8C /* TitlePageTabBarDelegate.swift */; };
+		80AA8C2A26087B430086B0FB /* NoneImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80AA8C2926087B430086B0FB /* NoneImageCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -102,6 +103,9 @@
 		800EE5772601162000FF4B8C /* TitlePageTabBar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitlePageTabBar.swift; sourceTree = "<group>"; };
 		800EE5782601162000FF4B8C /* TitlePageTabBar+Enum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "TitlePageTabBar+Enum.swift"; sourceTree = "<group>"; };
 		800EE5792601162000FF4B8C /* TitlePageTabBarDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitlePageTabBarDelegate.swift; sourceTree = "<group>"; };
+		80AA8C23260875370086B0FB /* 图片浏览器.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "图片浏览器.md"; sourceTree = "<group>"; };
+		80AA8C25260876010086B0FB /* 图片浏览器的核心逻辑.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "图片浏览器的核心逻辑.md"; sourceTree = "<group>"; };
+		80AA8C2926087B430086B0FB /* NoneImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoneImageCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -154,16 +158,10 @@
 		800EE5472601161F00FF4B8C /* ImageBrowser */ = {
 			isa = PBXGroup;
 			children = (
-				800EE5482601161F00FF4B8C /* CommonImageDwonloader.swift */,
-				800EE5492601161F00FF4B8C /* ImageCache.swift */,
+				80AA8C27260877A80086B0FB /* AUX */,
+				80AA8C24260875EB0086B0FB /* Core */,
+				80AA8C23260875370086B0FB /* 图片浏览器.md */,
 				800EE54A2601161F00FF4B8C /* ImageBrowserDelegate.swift */,
-				800EE54B2601161F00FF4B8C /* ImageLoadingState.swift */,
-				800EE54C2601161F00FF4B8C /* ImageResource.swift */,
-				800EE54D2601161F00FF4B8C /* ProgressView.swift */,
-				800EE54E2601161F00FF4B8C /* ProgressViewProtocol.swift */,
-				800EE54F2601161F00FF4B8C /* Image.swift */,
-				800EE5502601161F00FF4B8C /* ImageDownloader.swift */,
-				800EE5512601161F00FF4B8C /* ImagePageData.swift */,
 				800EE5522601161F00FF4B8C /* ImageBrowser.swift */,
 				800EE5532601161F00FF4B8C /* ImageBrowserViewController */,
 				800EE5582601161F00FF4B8C /* ImageBrowserCell.swift */,
@@ -254,6 +252,31 @@
 				800EE55B2601162000FF4B8C /* PageViewDataSource.swift */,
 			);
 			path = Protocol;
+			sourceTree = "<group>";
+		};
+		80AA8C24260875EB0086B0FB /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				80AA8C25260876010086B0FB /* 图片浏览器的核心逻辑.md */,
+				800EE54F2601161F00FF4B8C /* Image.swift */,
+				800EE54C2601161F00FF4B8C /* ImageResource.swift */,
+				800EE5492601161F00FF4B8C /* ImageCache.swift */,
+				800EE5502601161F00FF4B8C /* ImageDownloader.swift */,
+				800EE54B2601161F00FF4B8C /* ImageLoadingState.swift */,
+				800EE54E2601161F00FF4B8C /* ProgressViewProtocol.swift */,
+				800EE5512601161F00FF4B8C /* ImagePageData.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		80AA8C27260877A80086B0FB /* AUX */ = {
+			isa = PBXGroup;
+			children = (
+				800EE54D2601161F00FF4B8C /* ProgressView.swift */,
+				800EE5482601161F00FF4B8C /* CommonImageDwonloader.swift */,
+				80AA8C2926087B430086B0FB /* NoneImageCache.swift */,
+			);
+			path = AUX;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -355,6 +378,7 @@
 				800EE5912601162000FF4B8C /* PageViewDelegate.swift in Sources */,
 				800EE5802601162000FF4B8C /* ProgressViewProtocol.swift in Sources */,
 				800EE59D2601162000FF4B8C /* PageTabBarItem.swift in Sources */,
+				80AA8C2A26087B430086B0FB /* NoneImageCache.swift in Sources */,
 				800EE5A42601162000FF4B8C /* TitlePageTabBar+Enum.swift in Sources */,
 				800EE5A52601162000FF4B8C /* TitlePageTabBarDelegate.swift in Sources */,
 				800EE5A32601162000FF4B8C /* TitlePageTabBar.swift in Sources */,

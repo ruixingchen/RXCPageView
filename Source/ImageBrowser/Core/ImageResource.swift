@@ -10,6 +10,7 @@ import Photos
 
 ///定义了一个图片资源
 ///图片可以从很多地方获取到, 使用Resource对象来抽象一个图片资源
+///使用的时候按照属性顺序从上到下检索, 使用第一个不为空的属性来加载图片
 public struct ImageResource {
 
     ///图片对象
@@ -22,9 +23,6 @@ public struct ImageResource {
     public var url: URL?
     ///unrecognized object, but our smart developer can still load an image from this, are you?
     public var object: Any?
-
-    ///存储已经加载的图片数据
-    public var loadedImageCache: Any?
 
     public init(image: UIImage) {
         self.image = Image.init(image: image)

@@ -2,8 +2,7 @@
 // Created by ruixingchen on 2021/1/30.
 //
 
-import UIKit
-import Photos
+import Foundation
 
 ///定义了一个图片下载器
 public protocol ImageDownloader {

@@ -74,19 +74,9 @@ open class ImageBrowserViewController: UIViewController, PageViewDataSourcePrefe
         for i in pages {
             let imageData = self.imagePageDatas[i]
             //先查看有无缓存
-            if let cache = imageData.imageCache {
-                //先尝试读取原图缓存
-                cache.retrieveImage(for: imageData.originalImageResource) { (image) in
-                    guard image == nil else {return}
-                    //没有获取到原图的缓存, 查看是否自动下载原图
-                    if imageData.shouldLoadOriginalAutomatically {
-                        imageData.downloadOriginalImage()
-                    }else {
-                        imageData.downloadThumbnailImage()
-                    }
-                }
-            }else {
-                ///图片数据没有缓存功能, 直接开始下载
+            imageData.imageCache.retrieveImage(for: imageData.originalImageResource) { (image) in
+                guard image == nil else {return}
+                //没有获取到原图的缓存, 查看是否自动下载原图
                 if imageData.shouldLoadOriginalAutomatically {
                     imageData.downloadOriginalImage()
                 }else {
