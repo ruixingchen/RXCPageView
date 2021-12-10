@@ -70,6 +70,7 @@ open class PageView: UIView, UICollectionViewDataSource, UICollectionViewDelegat
         flow.minimumLineSpacing = 0
         flow.pageSpacing = 0
         let collectionView = UICollectionView.init(frame: self.bounds, collectionViewLayout: flow)
+        collectionView.backgroundColor = UIColor.clear
         collectionView.isDirectionalLockEnabled = true
         collectionView.contentInsetAdjustmentBehavior = .never
         collectionView.isPagingEnabled = true
