@@ -8,7 +8,7 @@
 import UIKit
 
 ///这个协议定义了悬浮View管理器,可以再PageView上添加一些浮层View
-public protocol PageViewFloatingViewManager {
+internal protocol PageViewFloatingViewManager {
 
     func addSubviews(to pageView: PageView)
 

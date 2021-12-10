@@ -7,8 +7,7 @@
 
 import UIKit
 
-///一个分页浏览器
-///当前的设计目标是成为横向浏览和竖向浏览的分页模式的基类
+///一个简单且枯燥分页结构, 设计目标是成为所有分页结构的基类
 open class PageView: UIView, UICollectionViewDataSource, UICollectionViewDelegate, UIScrollViewDelegate {
 
     open lazy var collectionView: UICollectionView = self.initCollectionView()
@@ -19,11 +18,11 @@ open class PageView: UIView, UICollectionViewDataSource, UICollectionViewDelegat
     ///这个属性暂时支持的不好, 不要使用
     internal var floatingViewManagers:[PageViewFloatingViewManager] = []
 
-    open weak var dataSource: PageViewDataSource?
+    public weak var dataSource: PageViewDataSource?
     
-    internal let delegates:NSPointerArray = NSPointerArray.init(options: .weakMemory)
-    internal let scrollEventReceivers:NSPointerArray = NSPointerArray.init(options: .weakMemory)
-    internal let prefetchingDelegates:NSPointerArray = NSPointerArray.init(options: .weakMemory)
+    public let delegates:NSPointerArray = NSPointerArray.init(options: .weakMemory)
+    public let scrollEventReceivers:NSPointerArray = NSPointerArray.init(options: .weakMemory)
+    public let prefetchingDelegates:NSPointerArray = NSPointerArray.init(options: .weakMemory)
 
     private var alreadyMoveToSuperview: Bool = false
     private var lastVisiblePages:[PageAttributes] = []
@@ -49,7 +48,7 @@ open class PageView: UIView, UICollectionViewDataSource, UICollectionViewDelegat
 
     ///是否开启预加载功能(非CollectionView的prefetching)
     open var prefetchEnabled: Bool = true
-    ///预加载多少页
+    ///预加载多少页, 只在 prefetchEnabled 为 true 的时候有效
     open var prefetchPages: Int = 2
 
     ///当前是否处于跳跃状态

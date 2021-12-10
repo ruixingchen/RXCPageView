@@ -9,9 +9,13 @@ import Foundation
 
 internal struct PVLog {
 
+    static var enabled: Bool = false
+
     internal static func verbose(_ closure: @autoclosure ()->Any) {
         #if (debug || DEBUG)
-        print(String.init(describing: closure()))
+        if Self.enabled {
+            print(String.init(describing: closure()))
+        }
         #endif
     }
 
