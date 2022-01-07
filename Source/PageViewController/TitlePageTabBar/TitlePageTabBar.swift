@@ -24,6 +24,8 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
     open var indicatorHeight: CGFloat = 3
     ///如果设置了这个值, 那么指示器的宽度不会随着Cell尺寸变化
     open var indicatorFixedWidth:CGFloat?
+    ///指示器偏移量
+    open var indicatorLocationOffset: CGPoint?
 
     ///控制Cell的样式
     open var cellStyle: TitlePageTabBarCellStyle = TitlePageTabBarCellStyle.init()
@@ -261,7 +263,12 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
         let height = self.indicatorHeight
         let x = midX - width/2
         let y = self.collectionView.bounds.maxY - height
-        return CGRect.init(x: x, y: y, width: width, height: height)
+        var _frame = CGRect.init(x: x, y: y, width: width, height: height)
+        if let offset = self.indicatorLocationOffset {
+            _frame.origin.x += offset.x
+            _frame.origin.y += offset.y
+        }
+        return _frame
     }
 
     ///计算一个滚动事件中所有Cell对应的高亮百分比
