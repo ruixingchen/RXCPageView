@@ -201,7 +201,7 @@ open class TitlePageTabBar: UIView, PageTabBar, UICollectionViewDataSource, UICo
         let text = NSMutableAttributedString.init(string: title)
         text.addAttribute(.font, value: self.cellStyle.font, range: NSRange.init(location: 0, length: text.length))
         var size = text.size()
-        size.width += 16
+        size.width += 24
         size.height = self.barHeight - 0.1
         return size
     }
